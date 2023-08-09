@@ -1,13 +1,11 @@
 import express from "express";
-import mongoose from "mongoose";
 import { getUsers, signin, signup } from "../controllers/user.js";
-
-const User = mongoose.model("User");
+import authenticateUser from "../middleware/authorization.js"
 
 const userRouter = express.Router();
 
-userRouter.get("/", getUsers);
 userRouter.post("/signup", signup);
 userRouter.post("/signin", signin);
+userRouter.get("/", authenticateUser, getUsers);
 
 export default userRouter;

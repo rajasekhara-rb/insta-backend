@@ -1,8 +1,13 @@
 import express from "express";
 import mongoose from "mongoose";
-import { getAllPosts } from "../controllers/post.js";
- const postRouter = express.Router();
+import { createPost, deletePost, getAllPosts, getMyPosts, getPostById, updatePost } from "../controllers/post.js";
+const postRouter = express.Router();
 
- postRouter.get("/", getAllPosts);
+postRouter.get("/allposts", getAllPosts);
+postRouter.get("/:id", getPostById);
+postRouter.get("/", getMyPosts);
+postRouter.post("/", createPost);
+postRouter.put("/:id", updatePost);
+postRouter.delete("/:id", deletePost)
 
- export default postRouter;
+export default postRouter;
