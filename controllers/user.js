@@ -6,7 +6,7 @@ import User from "../models/user.js";
 import { JWT_SCECRET_KEY } from "../keys.js";
 
 const getUsers = (req, res) => {
-    User.find({}).populate("", "_id name").then((users) => {
+    User.find({}).then((users) => {
         res.status(200).json({ Users: users })
     }).catch((error) => {
         console.log(error);

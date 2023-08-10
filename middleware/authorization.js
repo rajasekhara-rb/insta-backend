@@ -14,23 +14,27 @@ const authenticateUser = async (req, res, next) => {
             const token = authorization.replace("Bearer ", "");
 
             const payload = jwt.verify(token, JWT_SCECRET_KEY);
-            const { _id } = payload;
+            // const { _id } = payload;
 
-            const userdata = await User.findOne({_id:_id}).then((data)=>{
-                req.user = data;
-                next()
-            }).catch((error)=>{
-                console.log(error);
+            const userdata = await User.findById(payload.id);
+            // console.log(userdata)
+
+            if (!userdata) {
                 res.status(401).json({ error: "Unauthorized User. Please login First" })
-            })
-
-            // if (!userdata) {
+            } else {
+                // res.status(200).json({message:"User authentication successfull"})
+                req.user = userdata;
+                next()
+            }
+            // .then((userdata) => {
+            // req.user = userdata;
+            // next()
+            // }).catch((error) => {
+            //     console.log(error);
             //     res.status(401).json({ error: "Unauthorized User. Please login First" })
-            // } else {
-            //     // res.status(200).json({message:"User authentication successfull"})
-            //     req.user = userdata;
-            //     next()
-            // }
+            // })
+
+
         }
 
     } catch (error) {
