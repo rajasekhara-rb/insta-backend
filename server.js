@@ -31,10 +31,12 @@ app.use("/post", postRouter);
 // }
 // connectToMongoDB();
 
-mongoose.connect(MongoURI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-});
+mongoose.connect(MongoURI
+    // , {
+    // useNewUrlParser: true,
+    // useUnifiedTopology: true,
+    // }
+);
 
 mongoose.connection.on("connected", () => {
     console.log("Connection to the mongoDB database is successfull")

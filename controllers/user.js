@@ -1,7 +1,5 @@
-import express from "express";
 import bcrypt from "bcrypt";
 import Jwt from "jsonwebtoken";
-import mongoose from "mongoose";
 import User from "../models/user.js";
 import { JWT_SCECRET_KEY } from "../keys.js";
 
@@ -65,7 +63,8 @@ const signin = (req, res) => {
                         .then((doMatched) => {
                             if (doMatched) {
                                 const token = Jwt.sign({ id: savedUser._id }, JWT_SCECRET_KEY)
-                                res.status(200).json({ message: "Signin Successfull", token: token })
+                                const { _id, name, email } = savedUser;
+                                res.status(200).json({ message: "Signin Successfull", token: token, user: { _id, name, email } })
                             } else {
                                 res.status(400).json({ message: "Invalid user name or password" })
                             }

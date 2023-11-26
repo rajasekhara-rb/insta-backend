@@ -1,5 +1,3 @@
-import express from "express";
-import mongoose from "mongoose";
 import Post from "../models/post.js";
 // const Post = mongoose.model("Post");
 
@@ -64,8 +62,47 @@ const updatePost = (req, res) => {
     res.send("update post")
 }
 
+const likePost = async (req, res) => {
+    try {
+        const result = await Post.findByIdAndUpdate(
+            req.body.postId,
+            { $push: { likes: req.user._id } },
+            { new: true }
+        ).exec();
+        res.json(result);
+    } catch (error) {
+        res.status(422).json({ error: error });
+    }
+}
+
+const dislikePost = async (req, res) => {
+    try {
+        const result = await Post.findByIdAndUpdate(
+            req.body.postId,
+            { $pull: { likes: req.user._id } },
+            { new: true }
+        ).exec();
+        res.json(result);
+    } catch (error) {
+        res.status(422).json({ error: error });
+    }
+}
+
+const commentPost = (req, res) => {
+    try {
+
+    } catch (error) {
+        res.status(422).json({ error: error });
+    }
+}
+
 const deletePost = (req, res) => {
-    res.send("update post")
+    try {
+
+    } catch (error) {
+        res.status(422).json({ error: error });
+    }
+    // res.send("update post")
 }
 
 
@@ -75,5 +112,8 @@ export {
     getMyPosts,
     createPost,
     updatePost,
+    likePost,
+    dislikePost,
+    commentPost,
     deletePost
 }

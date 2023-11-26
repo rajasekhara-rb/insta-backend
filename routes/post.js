@@ -1,6 +1,6 @@
 import express from "express";
-import mongoose from "mongoose";
-import { createPost, deletePost, getAllPosts, getMyPosts, getPostById, updatePost } from "../controllers/post.js";
+
+import { commentPost, createPost, deletePost, dislikePost, getAllPosts, getMyPosts, getPostById, likePost, updatePost } from "../controllers/post.js";
 import authenticateUser from "../middleware/authorization.js";
 const postRouter = express.Router();
 
@@ -9,6 +9,9 @@ postRouter.get("/:id", authenticateUser, getPostById);
 postRouter.get("/", authenticateUser, getMyPosts);
 postRouter.post("/", authenticateUser, createPost);
 postRouter.put("/:id", authenticateUser, updatePost);
-postRouter.delete("/:id", authenticateUser, deletePost)
+postRouter.put("/like", authenticateUser, likePost);
+postRouter.put("/dislike", authenticateUser, dislikePost);
+postRouter.put("/comment", authenticateUser, commentPost);
+postRouter.delete("/:id", authenticateUser, deletePost);
 
 export default postRouter;
