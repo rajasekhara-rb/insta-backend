@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import Jwt from "jsonwebtoken";
 import User from "../models/user.js";
 import { JWT_SCECRET_KEY } from "../keys.js";
+import Post from "../models/post.js";
 
 const getUsers = (req, res) => {
     User.find({}).then((users) => {
@@ -80,4 +81,92 @@ const signin = (req, res) => {
     }
 }
 
-export { signup, getUsers, signin }
+const userById = async (req, res) => {
+    try {
+
+        const user = await User.findOne({ _id: req.params.id }).select("-password");
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        const posts = await Post.find({ postedBy: req.params.id })
+            .populate('postedBy', '_id name')
+            .exec();
+        res.json({ user, posts })
+
+    } catch (error) {
+        return res.status(422).json({ error: error.message })
+    }
+}
+
+const followUser = async (req, res) => {
+    try {
+        //first->we have to know the id of the user whom we want to follow
+        const followedUser = await User.findByIdAndUpdate(
+            req.body.followId,
+            { $push: { followers: req.user._id } },
+            { new: true }
+        );
+        //error
+        if (err) {
+            return res.status(422).json({ error: err });
+        }
+
+        //second->we hae to know the id of the user who is following
+        const followingUser = await User.findByIdAndUpdate(
+            req.user._id,
+            { $push: { following: req.body.followId } },
+            { new: true }
+        ).select("-password");
+
+        //send response to user with updated information about a person they followed.
+        res.json(followedUser, followingUser)
+    } catch (error) {
+        return res.status(422).json({ error: err });
+    }
+}
+
+const unFollowUser = async (req, res) => {
+    try {
+        //first->we have to know the id of the user whom we want to follow
+        const unfollowedUser = await User.findByIdAndUpdate(
+            req.body.unfollowId,
+            { $pull: { followers: req.user._id } },
+            { new: true }
+        );
+        //error 
+        if (err) {
+            return res.status(422).json({ error: err });
+        }
+
+        const unfollowingUser = await User.findByIdAndUpdate(
+            req.user._id,
+            { $pull: { following: req.body.unfollowId } },
+            { new: true }
+
+        ).select("-password");
+        //send a response to user about person they unfollowed.
+        res.json(unfollowingUser);
+
+    } catch (error) {
+        return res.status(422).json({ error: err })
+    }
+}
+
+const searchUser = async (req, res) => {
+    try {
+        //create a regex pattern match the user query.
+        let userpattern = new RegExp("^" + req.body.query)
+
+        //search a user User Schema for user whose email matches with the pattern 
+        const users = await User.find({ email: { $regex: userpattern } })
+
+        //send a response 
+        res.json({ users });
+    } catch (error) {
+        return res.status(422).json({ error: err });
+    }
+}
+
+export { signup, getUsers, signin, userById, followUser, unFollowUser, searchUser }

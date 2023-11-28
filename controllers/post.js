@@ -88,16 +88,42 @@ const dislikePost = async (req, res) => {
     }
 }
 
-const commentPost = (req, res) => {
+const commentPost = async (req, res) => {
     try {
+        const comment = {
+            text: req.body.text,
+            postedBy: req.user._id
+        }
+
+        const result = await Post.findOneAndUpdate(
+            req.body.postId,
+            { $push: { comments: comment } },
+            { new: true }
+        ).populate("comments.postedBy", "_id name")
+            .populate("postedBy", "_id name")
+            .exec();
+
+        res.json(result);
 
     } catch (error) {
         res.status(422).json({ error: error });
     }
 }
 
-const deletePost = (req, res) => {
+const deletePost = async (req, res) => {
     try {
+
+        const post = await Post.findOne({ _id: req.params.postId })
+            .populate("postedBy", "_id")
+            .exec();
+        if (!post) {
+            return res.status(422).json({ error: err })
+        }
+
+        if (post.postedBy._id.toString() === req.user._id.toString()) {
+            const result = await post.deleteOne();
+            res.json(result);
+        }
 
     } catch (error) {
         res.status(422).json({ error: error });
