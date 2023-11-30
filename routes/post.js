@@ -8,7 +8,7 @@ postRouter.get("/allposts", getAllPosts);
 postRouter.get("/:id", authenticateUser, getPostById);
 postRouter.get("/", authenticateUser, getMyPosts);
 postRouter.post("/", authenticateUser, createPost);
-postRouter.put("/:id", authenticateUser, updatePost);
+postRouter.put("/update/:id", authenticateUser, updatePost);
 postRouter.put("/like", authenticateUser, likePost);
 postRouter.put("/dislike", authenticateUser, dislikePost);
 postRouter.put("/comment", authenticateUser, commentPost);

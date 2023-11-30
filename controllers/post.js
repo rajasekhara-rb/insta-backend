@@ -89,13 +89,14 @@ const dislikePost = async (req, res) => {
 }
 
 const commentPost = async (req, res) => {
+    // console.log(req.body)
     try {
         const comment = {
             text: req.body.text,
             postedBy: req.user._id
         }
 
-        const result = await Post.findOneAndUpdate(
+        const result = await Post.findByIdAndUpdate(
             req.body.postId,
             { $push: { comments: comment } },
             { new: true }
@@ -113,7 +114,7 @@ const commentPost = async (req, res) => {
 const deletePost = async (req, res) => {
     try {
 
-        const post = await Post.findOne({ _id: req.params.postId })
+        const post = await Post.findOne({ _id: req.params.id })
             .populate("postedBy", "_id")
             .exec();
         if (!post) {
