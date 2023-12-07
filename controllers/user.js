@@ -83,7 +83,7 @@ const signin = (req, res) => {
 
 const userById = async (req, res) => {
     try {
-
+        // const id = req.params.userid
         const user = await User.findOne({ _id: req.params.id }).select("-password");
 
         if (!user) {
@@ -109,9 +109,9 @@ const followUser = async (req, res) => {
             { new: true }
         );
         //error
-        if (err) {
-            return res.status(422).json({ error: err });
-        }
+        // if (err) {
+        //     return res.status(422).json({ error: err });
+        // }
 
         //second->we hae to know the id of the user who is following
         const followingUser = await User.findByIdAndUpdate(
@@ -123,34 +123,62 @@ const followUser = async (req, res) => {
         //send response to user with updated information about a person they followed.
         res.json(followedUser, followingUser)
     } catch (error) {
-        return res.status(422).json({ error: err });
+        return res.status(422).json({ error: error });
     }
 }
 
 const unFollowUser = async (req, res) => {
     try {
         //first->we have to know the id of the user whom we want to follow
-        const unfollowedUser = await User.findByIdAndUpdate(
+        const followedUser = await User.findByIdAndUpdate(
             req.body.unfollowId,
             { $pull: { followers: req.user._id } },
             { new: true }
         );
         //error 
-        if (err) {
-            return res.status(422).json({ error: err });
-        }
+        // if (err) {
+        //     return res.status(422).json({ error: err });
+        // }
 
-        const unfollowingUser = await User.findByIdAndUpdate(
+        const followingUser = await User.findByIdAndUpdate(
             req.user._id,
             { $pull: { following: req.body.unfollowId } },
             { new: true }
 
         ).select("-password");
         //send a response to user about person they unfollowed.
-        res.json(unfollowingUser);
+
+        res.json(followingUser, followedUser);
 
     } catch (error) {
-        return res.status(422).json({ error: err })
+        return res.status(422).json({ error: error })
+    }
+}
+
+const followers = async (req, res) => {
+    try {
+        const followers = await User.find({ following:{$in: [req.user._id]}})
+            .select("-password");
+        // const followers = await User.aggregate([{
+        //     $project: {
+        //         $exists: {
+        //             $in: [req.user._id, "$following._id"]
+        //         }
+        //     }
+        // }])
+        res.json({ followers: followers })
+    } catch (error) {
+        return res.status(422).json({ error: error });
+    }
+}
+
+const following = async (req, res) => {
+    try {
+        const following = await User.find({ followers:{$in: [req.user._id]}})
+            .select("-password");
+        res.json({ following: following })
+    } catch (error) {
+        return res.status(422).json({ error: error });
     }
 }
 
@@ -165,8 +193,8 @@ const searchUser = async (req, res) => {
         //send a response 
         res.json({ users });
     } catch (error) {
-        return res.status(422).json({ error: err });
+        return res.status(422).json({ error: error });
     }
 }
 
-export { signup, getUsers, signin, userById, followUser, unFollowUser, searchUser }
+export { signup, getUsers, signin, userById, followUser, unFollowUser, searchUser, followers, following }
