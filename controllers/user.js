@@ -157,7 +157,7 @@ const unFollowUser = async (req, res) => {
 
 const followers = async (req, res) => {
     try {
-        const followers = await User.find({ following:{$in: [req.user._id]}})
+        const followers = await User.find({ following: { $in: [req.user._id] } })
             .select("-password");
         // const followers = await User.aggregate([{
         //     $project: {
@@ -174,7 +174,7 @@ const followers = async (req, res) => {
 
 const following = async (req, res) => {
     try {
-        const following = await User.find({ followers:{$in: [req.user._id]}})
+        const following = await User.find({ followers: { $in: [req.user._id] } })
             .select("-password");
         res.json({ following: following })
     } catch (error) {
@@ -197,4 +197,27 @@ const searchUser = async (req, res) => {
     }
 }
 
-export { signup, getUsers, signin, userById, followUser, unFollowUser, searchUser, followers, following }
+const editProfile = async (req, res) => {
+    try {
+        const { name, about, photo } = req.body;
+
+        const profile = await User.findByIdAndUpdate(
+            req.user._id,
+            {
+                name,
+                about,
+                photo
+            },
+            { new: true }
+        );
+
+        res.json({ profile: profile });
+
+
+    } catch (error) {
+        return res.status(422).json({ error: error });
+    }
+
+}
+
+export { signup, getUsers, signin, userById, followUser, unFollowUser, searchUser, followers, following, editProfile }

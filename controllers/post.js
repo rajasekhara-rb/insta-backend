@@ -2,7 +2,7 @@ import Post from "../models/post.js";
 // const Post = mongoose.model("Post");
 
 const getAllPosts = (req, res) => {
-    Post.find({}).populate("postedBy", "_id name")
+    Post.find({}).populate("postedBy", "_id name photo")
         .then((data) => {
             res.status(200).json({ posts: data })
         }).catch((error) => {
