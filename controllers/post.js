@@ -3,6 +3,7 @@ import Post from "../models/post.js";
 
 const getAllPosts = (req, res) => {
     Post.find({}).populate("postedBy", "_id name photo")
+        .populate("comments.postedBy", "_id name photo")
         .then((data) => {
             res.status(200).json({ posts: data })
         }).catch((error) => {
@@ -100,8 +101,8 @@ const commentPost = async (req, res) => {
             req.body.postId,
             { $push: { comments: comment } },
             { new: true }
-        ).populate("comments.postedBy", "_id name")
-            .populate("postedBy", "_id name")
+        ).populate("comments.postedBy", "_id name photo")
+            .populate("postedBy", "_id name photo")
             .exec();
 
         res.json(result);
