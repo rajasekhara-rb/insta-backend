@@ -1,4 +1,5 @@
 import Post from "../models/post.js";
+import { deleteCloudinayImage } from "../utils/cloudinaryUtil.js";
 // const Post = mongoose.model("Post");
 
 const getAllPosts = (req, res) => {
@@ -150,6 +151,9 @@ const deletePost = async (req, res) => {
         }
 
         if (post.postedBy._id.toString() === req.user._id.toString()) {
+
+            await deleteCloudinayImage(post.photo);
+
             const result = await post.deleteOne();
             res.json(result);
         }
