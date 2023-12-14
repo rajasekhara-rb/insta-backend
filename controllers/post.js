@@ -59,8 +59,33 @@ const createPost = (req, res) => {
     // res.send("create post")
 }
 
-const updatePost = (req, res) => {
-    res.send("update post")
+const updatePost = async (req, res) => {
+    // res.send("update post");
+    try {
+        const { title, body } = req.body;
+
+        const post = await Post.findOne({ _id: req.params.id })
+            .populate("postedBy", "_id")
+            .exec();
+        if (req.user._id.toString() === post.postedBy._id.toString()) {
+
+            const result = await post.updateOne({ title, body }, { new: true });
+            res.json(result);
+        } else {
+            res.status(200).json({ error: "Unauthorized Updation Request" })
+        }
+
+        // const result = await Post.findByIdAndUpdate(
+        //     req.params.id,
+        //     { title, body },
+        //     { new: true }
+        // ).populate("postedBy", "_id name photo")
+        // .exec();
+        // res.json(result);
+    } catch (error) {
+        console.log(error)
+        res.status(400).json({ error: "Post Updation Failed. Try Again" })
+    }
 }
 
 const likePost = async (req, res) => {
@@ -69,7 +94,8 @@ const likePost = async (req, res) => {
             req.body.postId,
             { $push: { likes: req.user._id } },
             { new: true }
-        ).exec();
+        ).populate("postedBy", "_id name photo")
+            .exec();
         res.json(result);
     } catch (error) {
         res.status(422).json({ error: error });
@@ -82,7 +108,8 @@ const dislikePost = async (req, res) => {
             req.body.postId,
             { $pull: { likes: req.user._id } },
             { new: true }
-        ).exec();
+        ).populate("postedBy", "_id name photo")
+            .exec();
         res.json(result);
     } catch (error) {
         res.status(422).json({ error: error });
@@ -116,7 +143,7 @@ const deletePost = async (req, res) => {
     try {
 
         const post = await Post.findOne({ _id: req.params.id })
-            .populate("postedBy", "_id")
+            .populate("postedBy", "_id name photo")
             .exec();
         if (!post) {
             return res.status(422).json({ error: err })

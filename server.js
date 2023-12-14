@@ -47,7 +47,10 @@ mongoose.connection.on("error", () => {
 })
 
 app.get("/", (req, res) => {
-    res.status(400).json({ message: "Server is Live" })
+    res.status(400).json({
+         message: "Server is Live",
+         author:"B. Rajasekhara Reddy",
+        })
 })
 
 app.listen(PORT, (err) => {
