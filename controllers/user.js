@@ -5,12 +5,14 @@ import { JWT_SCECRET_KEY } from "../keys.js";
 import Post from "../models/post.js";
 
 const getUsers = (req, res) => {
-    User.find({}).then((users) => {
-        res.status(200).json({ Users: users })
-    }).catch((error) => {
-        console.log(error);
-        res.status(400).json({ message: "Something went wrong" })
-    })
+    User.find({})
+        .select("-password")
+        .then((users) => {
+            res.status(200).json({ Users: users })
+        }).catch((error) => {
+            console.log(error);
+            res.status(400).json({ message: "Something went wrong" })
+        })
 }
 
 const signup = async (req, res) => {
@@ -107,7 +109,7 @@ const followUser = async (req, res) => {
             req.body.followId,
             { $push: { followers: req.user._id } },
             { new: true }
-        );
+        ).select("-password")
         //error
         // if (err) {
         //     return res.status(422).json({ error: err });
@@ -134,7 +136,7 @@ const unFollowUser = async (req, res) => {
             req.body.unfollowId,
             { $pull: { followers: req.user._id } },
             { new: true }
-        );
+        ).select("-password");
         //error 
         // if (err) {
         //     return res.status(422).json({ error: err });
@@ -188,7 +190,7 @@ const searchUser = async (req, res) => {
         let userpattern = new RegExp("^" + req.body.query)
 
         //search a user User Schema for user whose email matches with the pattern 
-        const users = await User.find({ email: { $regex: userpattern } })
+        const users = await User.find({ email: { $regex: userpattern } }).select("-password")
 
         //send a response 
         res.json({ users });
@@ -209,11 +211,9 @@ const editProfile = async (req, res) => {
                 photo
             },
             { new: true }
-        );
+        ).select("-password");
 
         res.json({ profile: profile });
-
-
     } catch (error) {
         return res.status(422).json({ error: error });
     }

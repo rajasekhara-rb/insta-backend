@@ -17,6 +17,8 @@ const getAllPosts = (req, res) => {
 const getPostById = (req, res) => {
     const id = req.params.id;
     Post.findById(id)
+        .populate("comments.postedBy", "_id name photo")
+        .populate("postedBy", "_id name photo")
         .then((post) => {
             res.status(200).json({ post })
         })
@@ -29,6 +31,8 @@ const getPostById = (req, res) => {
 const getMyPosts = (req, res) => {
     const userId = req.user._id;
     Post.find({ postedBy: userId })
+        .populate("postedBy", "_id name photo")
+        .populate("comments.postedBy", "_id name photo")
         .then((data) => {
             res.status(200).json({ myposts: data })
         })
@@ -49,7 +53,7 @@ const createPost = (req, res) => {
     })
     newPost.save()
         .then(async (data) => {
-            const newdata = await data.populate("postedBy", "_id name");
+            const newdata = await data.populate("postedBy", "_id name photo");
             res.status(200).json({ message: "Post created successfully", post: newdata })
         })
         .catch((error) => {
@@ -70,7 +74,9 @@ const updatePost = async (req, res) => {
             .exec();
         if (req.user._id.toString() === post.postedBy._id.toString()) {
 
-            const result = await post.updateOne({ title, body }, { new: true });
+            const result = await post.updateOne({ title, body }, { new: true })
+                .populate("postedBy", "_id name photo")
+                .populate("comments.postedBy", "_id name photo")
             res.json(result);
         } else {
             res.status(200).json({ error: "Unauthorized Updation Request" })
@@ -96,6 +102,7 @@ const likePost = async (req, res) => {
             { $push: { likes: req.user._id } },
             { new: true }
         ).populate("postedBy", "_id name photo")
+            .populate("comments.postedBy", "_id name photo")
             .exec();
         res.json(result);
     } catch (error) {
@@ -110,6 +117,7 @@ const dislikePost = async (req, res) => {
             { $pull: { likes: req.user._id } },
             { new: true }
         ).populate("postedBy", "_id name photo")
+            .populate("comments.postedBy", "_id name photo")
             .exec();
         res.json(result);
     } catch (error) {
