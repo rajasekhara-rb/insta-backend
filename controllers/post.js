@@ -3,7 +3,8 @@ import { deleteCloudinayImage } from "../utils/cloudinaryUtil.js";
 // const Post = mongoose.model("Post");
 
 const getAllPosts = (req, res) => {
-    Post.find({}).populate("postedBy", "_id name photo")
+    Post.find({})
+        .populate("postedBy", "_id name photo")
         .populate("comments.postedBy", "_id name photo")
         .then((data) => {
             res.status(200).json({ posts: data })
@@ -20,7 +21,7 @@ const getPostById = (req, res) => {
         .populate("comments.postedBy", "_id name photo")
         .populate("postedBy", "_id name photo")
         .then((post) => {
-            res.status(200).json({ post })
+            res.status(200).json({ post:post })
         })
         .catch((error) => {
             console.log(error)

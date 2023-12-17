@@ -10,6 +10,9 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    username: {
+        type: String,
+    },
     password: {
         type: String,
         required: true,
@@ -17,12 +20,15 @@ const userSchema = new mongoose.Schema({
     photo: {
         type: String,
     },
+    prevPhotos: {
+        type: Array,
+    },
     about: {
         type: String,
     },
     followers: [{ type: ObjectId, ref: "User" }],
     following: [{ type: ObjectId, ref: "User" }],
-})
+},{timeseries:true})
 
 const User = mongoose.model("User", userSchema);
 

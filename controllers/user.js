@@ -3,6 +3,7 @@ import Jwt from "jsonwebtoken";
 import User from "../models/user.js";
 import { JWT_SCECRET_KEY } from "../keys.js";
 import Post from "../models/post.js";
+import { deleteCloudinayImage } from "../utils/cloudinaryUtil.js";
 
 const getUsers = (req, res) => {
     User.find({})
@@ -201,23 +202,95 @@ const searchUser = async (req, res) => {
 
 const editProfile = async (req, res) => {
     try {
-        const { name, about, photo } = req.body;
+        const { name, username, about, photo, saveCurrentPhoto } = req.body;
+
+        const oldProfile = await User.findById(req.user._id);
+        // const newProfile = {
+        //     name,
+        //     username,
+        //     about,
+        //     photo,
+        //    prevPhotos:saveOldPhoto?oldProfile.photo:""
+        // }
+
+        if (saveCurrentPhoto === true) {
+            if (!oldProfile.prevPhotos.includes(oldProfile.photo)) {
+                await User.findByIdAndUpdate(
+                    req.user._id,
+                    {
+                        $push: { prevPhotos: oldProfile.photo }
+                    },
+                    { new: true }
+                )
+            }
+        } else {
+            await deleteCloudinayImage(oldProfile.photo);
+        }
 
         const profile = await User.findByIdAndUpdate(
             req.user._id,
             {
                 name,
+                username,
                 about,
-                photo
+                photo,
+                // $push: { prevPhotos: saveCurrentPhoto ? oldProfile.photo:"" }
             },
             { new: true }
         ).select("-password");
 
         res.json({ profile: profile });
     } catch (error) {
+        // console.log(error)
         return res.status(422).json({ error: error });
     }
 
 }
 
-export { signup, getUsers, signin, userById, followUser, unFollowUser, searchUser, followers, following, editProfile }
+const changeProfilePic = async (req, res) => {
+    const { saveCurrentPhoto, photo } = req.body;
+    try {
+        const oldProfile = await User.findById(req.user._id);
+
+        if (saveCurrentPhoto === true) {
+            if (!oldProfile.prevPhotos.includes(oldProfile.photo)) {
+                await User.findByIdAndUpdate(
+                    req.user._id,
+                    {
+                        $push: { prevPhotos: oldProfile.photo },
+                    },
+                    { new: true }
+                )
+            }
+        } else {
+            await deleteCloudinayImage(oldProfile.photo);
+        }
+
+        await User.findByIdAndUpdate(
+            req.user._id,
+            {
+                photo
+            },
+            { new: true }
+        )
+
+
+    } catch (error) {
+        return res.status(422).json({ error: error });
+    }
+
+}
+
+export {
+    signup,
+    getUsers,
+    signin,
+    userById,
+    followUser,
+    unFollowUser,
+    searchUser,
+    followers,
+    following,
+    editProfile,
+    changeProfilePic
+}
