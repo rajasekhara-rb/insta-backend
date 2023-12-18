@@ -21,7 +21,7 @@ const getPostById = (req, res) => {
         .populate("comments.postedBy", "_id name photo")
         .populate("postedBy", "_id name photo")
         .then((post) => {
-            res.status(200).json({ post:post })
+            res.status(200).json({ post: post })
         })
         .catch((error) => {
             console.log(error)
@@ -74,11 +74,16 @@ const updatePost = async (req, res) => {
             .populate("postedBy", "_id")
             .exec();
         if (req.user._id.toString() === post.postedBy._id.toString()) {
-
-            const result = await post.updateOne({ title, body }, { new: true })
-                .populate("postedBy", "_id name photo")
+            const result = await Post.findByIdAndUpdate(
+                req.params.id,
+                { title, body },
+                { new: true }
+            ).populate("postedBy", "_id name photo")
                 .populate("comments.postedBy", "_id name photo")
-            res.json(result);
+                .then((data) => {
+                    res.json(data);
+                })
+
         } else {
             res.status(200).json({ error: "Unauthorized Updation Request" })
         }
