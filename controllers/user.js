@@ -281,6 +281,24 @@ const changeProfilePic = async (req, res) => {
 
 }
 
+const deleteOldSavedProfilePic = async (req, res) => {
+    try {
+        const user = User.findOne({ _id: req.user._id });
+        // if (user.prevPhotos.includes(req.body.url)) {
+            await User.findByIdAndUpdate(
+                req.user._id,
+                { $pull: { prevPhotos: req.body.url } },
+                { new: true }
+            ).then((data) => {
+                deleteCloudinayImage(req.body.url);
+                res.json({ user: data });
+            })
+        // }
+    } catch (error) {
+        return res.status(422).json({ error: error });
+    }
+}
+
 export {
     signup,
     getUsers,
@@ -292,5 +310,6 @@ export {
     followers,
     following,
     editProfile,
-    changeProfilePic
+    changeProfilePic,
+    deleteOldSavedProfilePic
 }
